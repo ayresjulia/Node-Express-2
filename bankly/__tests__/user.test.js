@@ -1,13 +1,18 @@
 const db = require("../db.js");
 const User = require("../models/user.js");
-const { commonBeforeAll, commonBeforeEach, commonAfterEach, commonAfterAll } = require("../_testCommon");
+const {
+	commonBeforeAll,
+	commonBeforeEach,
+	commonAfterEach,
+	commonAfterAll
+} = require("../_testCommon");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
 afterAll(commonAfterAll);
 
-// TESTS BUG #2
+// TESTS BUG #2 & BUG #8
 describe("authenticate a user", () => {
 	test("authenticating with username and password", async () => {
 		const user = await User.authenticate("test1", "password1");

@@ -4,7 +4,7 @@ const User = require("../models/user");
 const express = require("express");
 const router = new express.Router();
 const ExpressError = require("../helpers/expressError");
-const { authUser, requireLogin, requireAdmin } = require("../middleware/auth");
+const { authUser, requireLogin, requireAdmin, requireUserOrAdmin } = require("../middleware/auth");
 
 /** GET /
  *
@@ -59,22 +59,35 @@ router.get("/:username", authUser, requireLogin, async function (req, res, next)
  *
  */
 
-router.patch("/:username", authUser, requireLogin, requireAdmin, async function (req, res, next) {
+// BUG #9
+router.patch("/:username", authUser, requireUserOrAdmin, async function (req, res, next) {
 	try {
-		if (!req.curr_admin && req.curr_username !== req.params.username) {
-			throw new ExpressError("Only that user or admin can edit a user.", 401);
+		//end
+		if (!req.curr_admin && req.params.username === "admin") {
+			throw new ExpressError("Only admin can patch admin data", 401);
+		} else if (!req.curr_admin && req.params.username !== req.curr_username) {
+			throw new ExpressError("Only admin can patch another user's data", 401);
 		}
-
-		// get fields to change; remove token so we don't try to change it
+		// get fields to change; remove token so we don't try to change them
 		let fields = { ...req.body };
 		delete fields._token;
+		// BUG #10 - will ignore username and admin fields
+		if (req.curr_admin === false) {
+			delete fields.username;
+			delete fields.admin;
+		}
 
-		let user = await User.update(req.params.username, fields);
-		return res.json({ user });
+		if (Object.keys(fields).length === 0) {
+			throw new ExpressError("Updating those fields is not allowed, please try again.", 401);
+		} else {
+			let user = await User.update(req.params.username, fields);
+			return res.json({ user });
+		}
+		//end
 	} catch (err) {
 		return next(err);
 	}
-}); // end
+});
 
 /** DELETE /[username]
  *

@@ -5,7 +5,7 @@ const { SECRET_KEY } = require("../config");
 
 /** Authorization Middleware: Requires user is logged in. */
 
-function requireLogin(req, res, next) {
+function requireLogin (req, res, next) {
 	try {
 		if (req.curr_username) {
 			return next();
@@ -19,9 +19,23 @@ function requireLogin(req, res, next) {
 
 /** Authorization Middleware: Requires user is logged in and is staff. */
 
-function requireAdmin(req, res, next) {
+function requireAdmin (req, res, next) {
 	try {
 		if (req.curr_admin) {
+			return next();
+		} else {
+			return next({ status: 401, message: "Unauthorized" });
+		}
+	} catch (err) {
+		return next(err);
+	}
+}
+
+/** Authorization Middleware: Requires user or admin to be logged in. */
+
+function requireUserOrAdmin (req, res, next) {
+	try {
+		if (req.curr_admin || req.curr_username) {
 			return next();
 		} else {
 			return next({ status: 401, message: "Unauthorized" });
@@ -44,7 +58,7 @@ function requireAdmin(req, res, next) {
  *
  **/
 
-function authUser(req, res, next) {
+function authUser (req, res, next) {
 	try {
 		const token = req.body._token || req.query._token;
 		if (token) {
@@ -62,5 +76,6 @@ function authUser(req, res, next) {
 module.exports = {
 	requireLogin,
 	requireAdmin,
-	authUser
+	authUser,
+	requireUserOrAdmin
 };

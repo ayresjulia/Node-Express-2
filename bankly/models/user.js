@@ -7,12 +7,12 @@ const { BCRYPT_WORK_FACTOR } = require("../config");
 class User {
 	/** Register user with data. Returns new user data. */
 
-	static async register({ username, password, first_name, last_name, email, phone }) {
+	static async register ({ username, password, first_name, last_name, email, phone }) {
 		const duplicateCheck = await db.query(
 			`SELECT username 
         FROM users 
         WHERE username = $1`,
-			[username]
+			[ username ]
 		);
 
 		if (duplicateCheck.rows[0]) {
@@ -26,7 +26,7 @@ class User {
           (username, password, first_name, last_name, email, phone) 
         VALUES ($1, $2, $3, $4, $5, $6) 
         RETURNING username, password, first_name, last_name, email, phone`,
-			[username, hashedPassword, first_name, last_name, email, phone]
+			[ username, hashedPassword, first_name, last_name, email, phone ]
 		);
 
 		return result.rows[0];
@@ -38,7 +38,7 @@ class User {
 	 *
 	 * */
 
-	static async authenticate(username, password) {
+	static async authenticate (username, password) {
 		const result = await db.query(
 			`SELECT username,
                 password,
@@ -49,7 +49,7 @@ class User {
                 admin
             FROM users 
             WHERE username = $1`,
-			[username]
+			[ username ]
 		);
 
 		const user = result.rows[0];
@@ -69,7 +69,7 @@ class User {
 	 *
 	 * */
 
-	static async getAll(username, password) {
+	static async getAll (username, password) {
 		const result = await db.query(
 			`SELECT username,
                 first_name,
@@ -88,7 +88,7 @@ class User {
 	 *
 	 **/
 
-	static async get(username) {
+	static async get (username) {
 		const result = await db.query(
 			`SELECT username,
                 first_name,
@@ -97,7 +97,7 @@ class User {
                 phone
          FROM users
          WHERE username = $1`,
-			[username]
+			[ username ]
 		);
 
 		const user = result.rows[0];
@@ -117,22 +117,22 @@ class User {
 	 *
 	 **/
 
-	static async update(username, data) {
+	static async update (username, data) {
 		// FIXES BUG #3
 		if (data.password) {
 			data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
-		}
+		} //end
 
 		let { query, values } = sqlForPartialUpdate("users", data, "username", username);
 
 		const result = await db.query(query, values);
 		const user = result.rows[0];
-
 		if (!user) {
 			throw new ExpressError("No such user", 404);
 		}
 		// FIXES BUG #4
 		delete user.password;
+		// end
 		return user;
 	}
 
@@ -142,8 +142,10 @@ class User {
 	 *
 	 **/
 
-	static async delete(username) {
-		const result = await db.query("DELETE FROM users WHERE username = $1 RETURNING username", [username]);
+	static async delete (username) {
+		const result = await db.query("DELETE FROM users WHERE username = $1 RETURNING username", [
+			username
+		]);
 		const user = result.rows[0];
 
 		if (!user) {

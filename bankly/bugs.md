@@ -26,3 +26,15 @@
 
 - in users.js route - delete route - "await" was missing to delete a user
   
+## Bug 8
+
+- in auth.js route - login route - "await" was missing to authenticate a user
+
+## Bug 9
+
+- in users.js route - patch route - edit if statement from beginning of try block and add requireUserOrAdmin function, so users can patch themselves, and admins are also authorized to do that. users cannot patch admin data
+
+## Bug 10
+
+- in users.js route - patch route - restricted user to update their username and admin status, throws a 401 err + extra error handling if 'username' and 'admin' were the only fields user wanted to update
+
